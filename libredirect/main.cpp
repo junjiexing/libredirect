@@ -51,29 +51,46 @@ int main()
 
 
 
-	FWPM_CALLOUT callout = { 0 };
+	FWPM_CALLOUT callout_v4 = { 0 };
 	FWPM_DISPLAY_DATA display_data = { 0 };
-	wchar_t callout_display_name[] = L"LibredirectCallout";
-	wchar_t callout_display_desc[] = L"Callout for Libredirect";
-	display_data.name = callout_display_name;
-	display_data.description = callout_display_desc;
+	wchar_t callout_display_name_v4[] = L"LibredirectCalloutV4";
+	wchar_t callout_display_desc_v4[] = L"IPv4 callout for Libredirect";
+	display_data.name = callout_display_name_v4;
+	display_data.description = callout_display_desc_v4;
 
-	callout.calloutKey = FORCEPROXY_CALLOUT_GUID;
-	callout.displayData = display_data;
-	callout.applicableLayer = FWPM_LAYER_ALE_CONNECT_REDIRECT_V4;
-	callout.flags = 0;
-	status = FwpmCalloutAdd(engine_handle, &callout, nullptr, nullptr);
+	callout_v4.calloutKey = LIBREDIRECT_CALLOUT_GUID_V4;
+	callout_v4.displayData = display_data;
+	callout_v4.applicableLayer = FWPM_LAYER_ALE_CONNECT_REDIRECT_V4;
+	callout_v4.flags = 0;
+	status = FwpmCalloutAdd(engine_handle, &callout_v4, nullptr, nullptr);
 	if (status != ERROR_SUCCESS)
 	{
-		std::cout << "FwpmCalloutAdd failed" << std::endl;;
+		std::cout << "FwpmCalloutAdd v4 failed" << std::endl;;
+		return status;
+	}
+
+	FWPM_CALLOUT callout_v6 = { 0 };
+	FWPM_DISPLAY_DATA display_data_v6 = { 0 };
+	wchar_t callout_display_name_v6[] = L"LibredirectCalloutV6";
+	wchar_t callout_display_desc_v6[] = L"IPv6 callout for Libredirect";
+	display_data_v6.name = callout_display_name_v6;
+	display_data_v6.description = callout_display_desc_v6;
+
+	callout_v6.calloutKey = LIBREDIRECT_CALLOUT_GUID_V6;
+	callout_v6.displayData = display_data_v6;
+	callout_v6.applicableLayer = FWPM_LAYER_ALE_CONNECT_REDIRECT_V6;
+	callout_v6.flags = 0;
+	status = FwpmCalloutAdd(engine_handle, &callout_v6, nullptr, nullptr);
+	if (status != ERROR_SUCCESS)
+	{
+		std::cout << "FwpmCalloutAdd v6 failed" << std::endl;;
 		return status;
 	}
 
 
 
 	FWPM_SUBLAYER sublayer = { 0 };
-
-	sublayer.subLayerKey = FORCEPROXY_SUBLAYER_GUID;
+	sublayer.subLayerKey = LIBREDIRECT_SUBLAYER_GUID;
 	wchar_t sublayer_display_name[] = L"LibredirectSublayer";;
 	sublayer.displayData.name = sublayer_display_name;
 	wchar_t sublayer_display_desc[] = L"Sublayer for Libredirect";
@@ -87,24 +104,44 @@ int main()
 		return status;
 	}
 
-	FWPM_FILTER filter = { 0 };
-	UINT64 filter_id = 0;
-
-	wchar_t filter_display_name[] = L"LibredirectFilter";
-	filter.displayData.name = filter_display_name;
-	wchar_t filter_display_desc[] = L"Filter for Libredirect";
-	filter.displayData.description = filter_display_desc;
-	filter.action.type = FWP_ACTION_CALLOUT_TERMINATING;
-	filter.subLayerKey = FORCEPROXY_SUBLAYER_GUID;
-	filter.weight.type = FWP_UINT8;
-	filter.weight.uint8 = 0xf;
-	filter.numFilterConditions = 0;
-	filter.layerKey = FWPM_LAYER_ALE_CONNECT_REDIRECT_V4;
-	filter.action.calloutKey = FORCEPROXY_CALLOUT_GUID;
-	status = FwpmFilterAdd(engine_handle, &filter, nullptr, &filter_id);
+	FWPM_FILTER filter_v4 = { 0 };
+	UINT64 filter_id_v4 = 0;
+	wchar_t filter_display_name_v4[] = L"LibredirectFilterV4";
+	filter_v4.displayData.name = filter_display_name_v4;
+	wchar_t filter_display_desc_v4[] = L"IPv4 filter for Libredirect";
+	filter_v4.displayData.description = filter_display_desc_v4;
+	filter_v4.action.type = FWP_ACTION_CALLOUT_TERMINATING;
+	filter_v4.subLayerKey = LIBREDIRECT_SUBLAYER_GUID;
+	filter_v4.weight.type = FWP_UINT8;
+	filter_v4.weight.uint8 = 0xf;
+	filter_v4.numFilterConditions = 0;
+	filter_v4.layerKey = FWPM_LAYER_ALE_CONNECT_REDIRECT_V4;
+	filter_v4.action.calloutKey = LIBREDIRECT_CALLOUT_GUID_V4;
+	status = FwpmFilterAdd(engine_handle, &filter_v4, nullptr, &filter_id_v4);
 	if (status != ERROR_SUCCESS)
 	{
-		std::cout << "FwpmFilterAdd failed" << std::endl;;
+		std::cout << "Add IPv4 filter failed:" << status << std::endl;;
+		return status;
+	}
+
+
+	FWPM_FILTER filter_v6 = { 0 };
+	UINT64 filter_id_v6 = 0;
+	wchar_t filter_display_name_v6[] = L"LibredirectFilterV6";
+	filter_v6.displayData.name = filter_display_name_v6;
+	wchar_t filter_display_desc_v6[] = L"IPv6 filter for Libredirect";
+	filter_v6.displayData.description = filter_display_desc_v6;
+	filter_v6.action.type = FWP_ACTION_CALLOUT_TERMINATING;
+	filter_v6.subLayerKey = LIBREDIRECT_SUBLAYER_GUID;
+	filter_v6.weight.type = FWP_UINT8;
+	filter_v6.weight.uint8 = 0xf;
+	filter_v6.numFilterConditions = 0;
+	filter_v6.layerKey = FWPM_LAYER_ALE_CONNECT_REDIRECT_V6;
+	filter_v6.action.calloutKey = LIBREDIRECT_CALLOUT_GUID_V6;
+	status = FwpmFilterAdd(engine_handle, &filter_v6, nullptr, &filter_id_v6);
+	if (status != ERROR_SUCCESS)
+	{
+		std::cout << "Add IPv6 filter failed:" << status << std::endl;;
 		return status;
 	}
 

@@ -36,9 +36,8 @@ void callout_classify(
 	}
 	else if (inFixedValues->layerId == FWPS_LAYER_ALE_CONNECT_REDIRECT_V6)
 	{
-		// TODO:
+		// TODO:将地址信息发送到应用层
 		conn.ip_version = 6;
-		KdPrint(("inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_LOCAL_ADDRESS].value.type: %d", inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_LOCAL_ADDRESS].value.type));
 		//inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_LOCAL_ADDRESS].value.byteArray16
 		classifyOut->actionType = FWP_ACTION_PERMIT;
 		return;
