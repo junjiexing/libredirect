@@ -101,7 +101,6 @@ int main()
 	filter.numFilterConditions = 0;
 	filter.layerKey = FWPM_LAYER_ALE_CONNECT_REDIRECT_V4;
 	filter.action.calloutKey = FORCEPROXY_CALLOUT_GUID;
-	filter.rawContext = 4;
 	status = FwpmFilterAdd(engine_handle, &filter, nullptr, &filter_id);
 	if (status != ERROR_SUCCESS)
 	{
