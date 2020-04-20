@@ -1,0 +1,13 @@
+/x64
+/Debug
+/Release
+
+/libredirect/x64
+/libredirect/Debug
+/libredirect/Release
+
+/Redirect/x64
+/Redirect/Debug
+/Redirect/Release
+
+/.vs
