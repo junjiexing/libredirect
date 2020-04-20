@@ -21,7 +21,7 @@ void callout_classify(
 	UNREFERENCED_PARAMETER(layerData);
 	UNREFERENCED_PARAMETER(flowContext);
 
-	KdPrint(("|LIBREDIRECT|callout_classify|layerId: %lld", inFixedValues->layerId));
+	KdPrint(("|LIBREDIRECT|callout_classify|layerId: %d", inFixedValues->layerId));
 	connect_t conn;
 	if (inFixedValues->layerId == FWPS_LAYER_ALE_CONNECT_REDIRECT_V4)
 	{
@@ -38,6 +38,7 @@ void callout_classify(
 	{
 		// TODO:
 		conn.ip_version = 6;
+		KdPrint(("inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_LOCAL_ADDRESS].value.type: %d", inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_LOCAL_ADDRESS].value.type));
 		//inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_LOCAL_ADDRESS].value.byteArray16
 		classifyOut->actionType = FWP_ACTION_PERMIT;
 		return;

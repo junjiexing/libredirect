@@ -53,8 +53,8 @@ int main()
 
 	FWPM_CALLOUT callout = { 0 };
 	FWPM_DISPLAY_DATA display_data = { 0 };
-	wchar_t callout_display_name[] = L"ForceProxyCallout";
-	wchar_t callout_display_desc[] = L"Callout for ForceProxy";
+	wchar_t callout_display_name[] = L"LibredirectCallout";
+	wchar_t callout_display_desc[] = L"Callout for Libredirect";
 	display_data.name = callout_display_name;
 	display_data.description = callout_display_desc;
 
@@ -74,9 +74,9 @@ int main()
 	FWPM_SUBLAYER sublayer = { 0 };
 
 	sublayer.subLayerKey = FORCEPROXY_SUBLAYER_GUID;
-	wchar_t sublayer_display_name[] = L"ForceProxySublayer";;
+	wchar_t sublayer_display_name[] = L"LibredirectSublayer";;
 	sublayer.displayData.name = sublayer_display_name;
-	wchar_t sublayer_display_desc[] = L"Sublayer for ForceProxy";
+	wchar_t sublayer_display_desc[] = L"Sublayer for Libredirect";
 	sublayer.displayData.description = sublayer_display_desc;
 	sublayer.flags = 0;
 	sublayer.weight = 0x0f;
@@ -90,9 +90,9 @@ int main()
 	FWPM_FILTER filter = { 0 };
 	UINT64 filter_id = 0;
 
-	wchar_t filter_display_name[] = L"FoprceProxyFilter";
+	wchar_t filter_display_name[] = L"LibredirectFilter";
 	filter.displayData.name = filter_display_name;
-	wchar_t filter_display_desc[] = L"Filter for ForceProxy";
+	wchar_t filter_display_desc[] = L"Filter for Libredirect";
 	filter.displayData.description = filter_display_desc;
 	filter.action.type = FWP_ACTION_CALLOUT_TERMINATING;
 	filter.subLayerKey = FORCEPROXY_SUBLAYER_GUID;
