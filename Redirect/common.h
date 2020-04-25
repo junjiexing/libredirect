@@ -16,7 +16,6 @@ DEFINE_GUID(LIBREDIRECT_SUBLAYER_GUID,
 #define IOCTL_GET_CONN CTL_CODE(FILE_DEVICE_UNKNOWN,0x801,METHOD_BUFFERED,FILE_ANY_ACCESS)
 #define IOCTL_SET_CONN CTL_CODE(FILE_DEVICE_UNKNOWN,0x802,METHOD_BUFFERED,FILE_ANY_ACCESS)
 
-#define FORMAT_ADDR(x) (x>>24)&0xFF, (x>>16)&0xFF, (x>>8)&0xFF, x&0xFF
 
 
 struct connect_t
@@ -26,14 +25,18 @@ struct connect_t
 	{
 		struct
 		{
-			UINT32 local_address;
-			UINT32 remote_address;
-			UINT16 local_port;
-			UINT16 remote_port;
+			IN_ADDR local_address;
+			IN_ADDR remote_address;
+			USHORT local_port;
+			USHORT remote_port;
 		} v4;
 		struct
 		{
-
+			IN6_ADDR local_address;
+			IN6_ADDR remote_address;
+			USHORT local_port;
+			USHORT remote_port;
+			SCOPE_ID remote_scope_id;
 		}v6;
 	};
 

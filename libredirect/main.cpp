@@ -3,29 +3,27 @@
 #include <windows.h>
 #include <fwpmu.h>
 #include <fwpstypes.h>
+#include <WS2tcpip.h>
 #include <iostream>
+#include <cassert>
 
 #include <common.h>
 
 
 void process(connect_t& conn)
 {
-	if (conn.ip_version == 4)
+	if (conn.ip_version == 4 && conn.v4.remote_port == 5000)
 	{
-		if (conn.v4.remote_port == 5000)
-		{
-			std::cout << "redirect." << std::endl;
-			// 注意这里是小端
-			auto remote_addr = reinterpret_cast<IN_ADDR*>(&conn.v4.remote_address);
-			remote_addr->S_un.S_un_b.s_b4 = 127;
-			remote_addr->S_un.S_un_b.s_b3 = 0;
-			remote_addr->S_un.S_un_b.s_b2 = 0;
-			remote_addr->S_un.S_un_b.s_b1 = 1;
-		}
+		std::cout << "redirect v4." << std::endl;
+		inet_pton(AF_INET, "127.0.0.1", &conn.v4.remote_address);
+		conn.v4.remote_port = 5001;
 	}
-	else
+	else if (conn.ip_version == 6 && conn.v6.remote_port == 5000)
 	{
-		// TODO: IPv6
+		std::cout << "redirect v6." << std::endl;
+		inet_pton(AF_INET6, "::1", &conn.v6.remote_address);
+		conn.v6.remote_port = 5001;
+		conn.v6.remote_scope_id.Value = 0;
 	}
 }
 
@@ -177,20 +175,33 @@ int main()
 			std::cout << "recv failed" << std::endl;
 			continue;
 		}
+		assert(conn.ip_version == 4 || conn.ip_version == 6);
 
 		if (conn.ip_version == 4)
 		{
-			UINT32 local_addr = conn.v4.local_address;
-			UINT16 local_port = conn.v4.local_port;
-			UINT32 remote_addr = conn.v4.remote_address;
-			UINT16 remote_port = conn.v4.remote_port;
-			printf("%d.%d.%d.%d:%d --> %d.%d.%d.%d:%d, PID:%lld\n",
-				FORMAT_ADDR(local_addr), local_port,
-				FORMAT_ADDR(remote_addr), remote_port, conn.process_id);
+			auto local_addr = conn.v4.local_address;
+			auto local_port = conn.v4.local_port;
+			auto remote_addr = conn.v4.remote_address;
+			auto remote_port = conn.v4.remote_port;
+			char local_addr_str[20];
+			inet_ntop(AF_INET, &local_addr, local_addr_str, sizeof(local_addr_str));
+			char remote_addr_str[20];
+			inet_ntop(AF_INET, &remote_addr, remote_addr_str, sizeof(remote_addr_str));
+			printf("%s:%d --> %s:%d, PID:%lld\n",
+				local_addr_str, local_port, remote_addr_str, remote_port, conn.process_id);
 		}
 		else
 		{
-			// TODO: IPv6
+			auto local_addr = conn.v6.local_address;
+			auto local_port = conn.v6.local_port;
+			auto remote_addr = conn.v6.remote_address;
+			auto remote_port = conn.v6.remote_port;
+			char local_addr_str[50];
+			inet_ntop(AF_INET6, &local_addr, local_addr_str, sizeof(local_addr_str));
+			char remote_addr_str[50];
+			inet_ntop(AF_INET6, &remote_addr, remote_addr_str, sizeof(remote_addr_str));
+			printf("%s:%d --> %s:%d, PID:%lld\n",
+				local_addr_str, local_port, remote_addr_str, remote_port, conn.process_id);
 		}
 
 		process(conn);

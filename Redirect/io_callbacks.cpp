@@ -62,9 +62,9 @@ VOID device_ioctl(IN WDFQUEUE queue, IN WDFREQUEST request,
 		WdfWaitLockAcquire(connect_list_lck, nullptr);
 		if (!IsListEmpty(&connect_list))
 		{
+			auto entry = RemoveTailList(&connect_list);
 			WdfWaitLockRelease(connect_list_lck);
 
-			auto entry = RemoveTailList(&connect_list);
 			auto item = CONTAINING_RECORD(entry, conn_item_t, list_entry);
 			void* outbuf;
 			size_t outlen;
