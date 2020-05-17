@@ -158,7 +158,7 @@ int libredirect_read_connect(HANDLE handle, connect_t* conn)
 	{
 		return 0;
 	}
-	assert(conn->ip_version == 4 || conn->ip_version == 6);
+	assert(conn->addr_info.ip_version == 4 || conn->addr_info.ip_version == 6);
 
 	return 1;
 }

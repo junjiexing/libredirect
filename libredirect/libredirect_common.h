@@ -18,9 +18,7 @@ DEFINE_GUID(LIBREDIRECT_SUBLAYER_GUID,
 #define IOCTL_GET_CONN CTL_CODE(FILE_DEVICE_UNKNOWN,0x801,METHOD_BUFFERED,FILE_ANY_ACCESS)
 #define IOCTL_SET_CONN CTL_CODE(FILE_DEVICE_UNKNOWN,0x802,METHOD_BUFFERED,FILE_ANY_ACCESS)
 
-
-
-struct connect_t
+typedef struct _addr_info_t 
 {
 	int ip_version;
 	union
@@ -43,7 +41,11 @@ struct connect_t
 	};
 
 	UINT64 process_id;
+} addr_info_t;
 
+typedef struct _connect_t
+{
+	addr_info_t addr_info;
 	DWORD local_redirect_pid;
 
 	struct
@@ -52,4 +54,5 @@ struct connect_t
 		UINT64 filter_id;
 		FWPS_CLASSIFY_OUT classify_out;
 	} _priv;
-};
+} connect_t;
+

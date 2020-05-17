@@ -17,6 +17,8 @@ WDFWAITLOCK connect_list_lck;
 	RtlUshortByteSwap(x.u.Word[6]), \
 	RtlUshortByteSwap(x.u.Word[7])
 
+#define REDIRECT_POOL_TAG "ider"
+
 
 void callout_classify(
 	const FWPS_INCOMING_VALUES* inFixedValues,
@@ -32,36 +34,51 @@ void callout_classify(
 
 	KdPrint(("|LIBREDIRECT|callout_classify|layerId: %d", inFixedValues->layerId));
 	connect_t conn;
-	conn.process_id = inMetaValues->processId;
+	conn.addr_info.process_id = inMetaValues->processId;
 	conn.local_redirect_pid = 0xFFFF;
 	if (inFixedValues->layerId == FWPS_LAYER_ALE_CONNECT_REDIRECT_V4)
 	{
-		conn.ip_version = 4;
+		conn.addr_info.ip_version = 4;
 		// FWP_UINT32
-		conn.v4.local_address = *reinterpret_cast<IN_ADDR*>(&inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V4_IP_LOCAL_ADDRESS].value.uint32);
+		conn.addr_info.v4.local_address =
+			*reinterpret_cast<IN_ADDR*>(&inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V4_IP_LOCAL_ADDRESS].value.uint32);
 		// FWP_UINT32
-		conn.v4.remote_address = *reinterpret_cast<IN_ADDR*>(&inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V4_IP_REMOTE_ADDRESS].value.uint32);
+		conn.addr_info.v4.remote_address =
+			*reinterpret_cast<IN_ADDR*>(&inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V4_IP_REMOTE_ADDRESS].value.uint32);
 		// FWP_UINT16
-		conn.v4.local_port = inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V4_IP_LOCAL_PORT].value.uint16;
+		conn.addr_info.v4.local_port =
+			inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V4_IP_LOCAL_PORT].value.uint16;
 		// FWP_UINT16
-		conn.v4.remote_port = inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V4_IP_REMOTE_PORT].value.uint16;
+		conn.addr_info.v4.remote_port
+			= inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V4_IP_REMOTE_PORT].value.uint16;
+
 		KdPrint(("|LIBREDIRECT|callout_classify|IPv4, %d.%d.%d.%d:%hu --> %d.%d.%d.%d:%hu, PID: %lld",
-			FORMAT_ADDR4(conn.v4.local_address), conn.v4.local_port, FORMAT_ADDR4(conn.v4.remote_address), conn.v4.remote_port, conn.process_id));
+			FORMAT_ADDR4(conn.addr_info.v4.local_address), conn.addr_info.v4.local_port,
+			FORMAT_ADDR4(conn.addr_info.v4.remote_address), conn.addr_info.v4.remote_port,
+			conn.addr_info.process_id));
 	}
 	else if (inFixedValues->layerId == FWPS_LAYER_ALE_CONNECT_REDIRECT_V6)
 	{
-		conn.ip_version = 6;
+		conn.addr_info.ip_version = 6;
 		// FWP_BYTE_ARRAY16_TYPE
-		conn.v6.local_address = *reinterpret_cast<IN6_ADDR*>(inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_LOCAL_ADDRESS].value.byteArray16);
+		conn.addr_info.v6.local_address =
+			*reinterpret_cast<IN6_ADDR*>(inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_LOCAL_ADDRESS].value.byteArray16);
 		// FWP_BYTE_ARRAY16_TYPE
-		conn.v6.remote_address = *reinterpret_cast<IN6_ADDR*>(inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_REMOTE_ADDRESS].value.byteArray16);
+		conn.addr_info.v6.remote_address =
+			*reinterpret_cast<IN6_ADDR*>(inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_REMOTE_ADDRESS].value.byteArray16);
 		// FWP_UINT16
-		conn.v6.local_port = inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_LOCAL_PORT].value.uint16;
+		conn.addr_info.v6.local_port =
+			inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_LOCAL_PORT].value.uint16;
 		// FWP_UINT16
-		conn.v6.remote_port = inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_REMOTE_PORT].value.uint16;
-		conn.v6.remote_scope_id = inMetaValues->remoteScopeId;
+		conn.addr_info.v6.remote_port =
+			inFixedValues->incomingValue[FWPS_FIELD_ALE_CONNECT_REDIRECT_V6_IP_REMOTE_PORT].value.uint16;
+
+		conn.addr_info.v6.remote_scope_id = inMetaValues->remoteScopeId;
+
 		KdPrint(("|LIBREDIRECT|callout_classify|IPv6, %x:%x:%x:%x:%x:%x:%x::%x:%hu --> %x:%x:%x:%x:%x:%x:%x::%x:%hu, PID: %lld",
-			FORMAT_ADDR6(conn.v6.local_address), conn.v6.local_port, FORMAT_ADDR6(conn.v6.remote_address), conn.v6.remote_port, conn.process_id));
+			FORMAT_ADDR6(conn.addr_info.v6.local_address), conn.addr_info.v6.local_port,
+			FORMAT_ADDR6(conn.addr_info.v6.remote_address), conn.addr_info.v6.remote_port,
+			conn.addr_info.process_id));
 	}
 	else
 	{
@@ -206,8 +223,17 @@ void do_redirect(connect_t& conn)
 	auto connect_request = reinterpret_cast<FWPS_CONNECT_REQUEST*>(writeable_layer_data);
 	connect_request->localRedirectHandle = redirect_handle;
 
+	// 设置转发context，用于在服务端获取
+	auto addr_info = reinterpret_cast<addr_info_t*>(
+		ExAllocatePoolWithTag(
+			NonPagedPool, sizeof(addr_info_t),
+			*reinterpret_cast<const ULONG*>(REDIRECT_POOL_TAG)		// shit
+		));
+	connect_request->localRedirectContext = addr_info;
+	connect_request->localRedirectContextSize = sizeof(addr_info_t);
+	addr_info->process_id = conn.addr_info.process_id;
 
-	if (conn.ip_version == 4)
+	if (conn.addr_info.ip_version == 4)
 	{
 		auto remote_addr = reinterpret_cast<SOCKADDR_IN*>(&connect_request->remoteAddressAndPort);
 		auto local_addr = reinterpret_cast<SOCKADDR_IN*>(&connect_request->localAddressAndPort);
@@ -219,10 +245,10 @@ void do_redirect(connect_t& conn)
 		remote_ip.S_un.S_addr = RtlUlongByteSwap(remote_addr->sin_addr.S_un.S_addr);
 		auto remote_port = RtlUshortByteSwap(remote_addr->sin_port);
 
-		auto mod_local_ip = conn.v4.local_address;
-		auto mod_local_port = conn.v4.local_port;
-		auto mod_remote_ip = conn.v4.remote_address;
-		auto mod_remote_port = conn.v4.remote_port;
+		auto mod_local_ip = conn.addr_info.v4.local_address;
+		auto mod_local_port = conn.addr_info.v4.local_port;
+		auto mod_remote_ip = conn.addr_info.v4.remote_address;
+		auto mod_remote_port = conn.addr_info.v4.remote_port;
 
 
 		DbgPrint("|LIBREDIRECT|do_redirect|IPv4 origin: %d.%d.%d.%d:%hu --> %d.%d.%d.%d:%hu; modified: %d.%d.%d.%d:%hu --> %d.%d.%d.%d:%hu",
@@ -231,11 +257,17 @@ void do_redirect(connect_t& conn)
 			FORMAT_ADDR4(mod_local_ip), mod_local_port,
 			FORMAT_ADDR4(mod_remote_ip), mod_remote_port);
 #endif
+		// 把原地址信息存放到context中
+		addr_info->ip_version = 4;
+		addr_info->v4.local_address.S_un.S_addr = RtlUlongByteSwap(local_addr->sin_addr.S_un.S_addr);
+		addr_info->v4.local_port = RtlUshortByteSwap(local_addr->sin_port);
+		addr_info->v4.remote_address.S_un.S_addr = RtlUlongByteSwap(remote_addr->sin_addr.S_un.S_addr);
+		addr_info->v4.remote_port = RtlUshortByteSwap(remote_addr->sin_port);
 
-		remote_addr->sin_addr.S_un.S_addr = RtlUlongByteSwap(conn.v4.remote_address.S_un.S_addr);
-		remote_addr->sin_port = RtlUshortByteSwap(conn.v4.remote_port);
-		local_addr->sin_addr.S_un.S_addr = RtlUlongByteSwap(conn.v4.local_address.S_un.S_addr);
-		local_addr->sin_port = RtlUshortByteSwap(conn.v4.local_port);
+		remote_addr->sin_addr.S_un.S_addr = RtlUlongByteSwap(conn.addr_info.v4.remote_address.S_un.S_addr);
+		remote_addr->sin_port = RtlUshortByteSwap(conn.addr_info.v4.remote_port);
+		local_addr->sin_addr.S_un.S_addr = RtlUlongByteSwap(conn.addr_info.v4.local_address.S_un.S_addr);
+		local_addr->sin_port = RtlUshortByteSwap(conn.addr_info.v4.local_port);
 	}
 	else
 	{
@@ -249,11 +281,11 @@ void do_redirect(connect_t& conn)
 		auto remote_port = remote_addr->sin6_port;
 		auto remote_scope = local_addr->sin6_scope_id;
 
-		auto mod_local_ip = conn.v6.local_address;
-		auto mod_local_port = conn.v6.local_port;
-		auto mod_remote_ip = conn.v6.remote_address;
-		auto mod_remote_port = conn.v6.remote_port;
-		auto mod_remote_scope = conn.v6.remote_scope_id.Value;
+		auto mod_local_ip = conn.addr_info.v6.local_address;
+		auto mod_local_port = conn.addr_info.v6.local_port;
+		auto mod_remote_ip = conn.addr_info.v6.remote_address;
+		auto mod_remote_port = conn.addr_info.v6.remote_port;
+		auto mod_remote_scope = conn.addr_info.v6.remote_scope_id.Value;
 
 		DbgPrint("|LIBREDIRECT|callout_classify|IPv6 origin: %x:%x:%x:%x:%x:%x:%x::%x%%%d:%hu --> %x:%x:%x:%x:%x:%x:%x::%x%%%d:%hu; "
 			"modified: %x:%x:%x:%x:%x:%x:%x::%x%%%d:%hu --> %x:%x:%x:%x:%x:%x:%x::%x%%%d:%hu",
@@ -263,11 +295,19 @@ void do_redirect(connect_t& conn)
 			FORMAT_ADDR6(mod_remote_ip), mod_remote_scope, mod_remote_port);
 
 #endif
-		remote_addr->sin6_addr = conn.v6.remote_address;
-		remote_addr->sin6_port = RtlUshortByteSwap(conn.v6.remote_port);
-		remote_addr->sin6_scope_id = conn.v6.remote_scope_id.Value;
-		local_addr->sin6_addr = conn.v6.local_address;
-		local_addr->sin6_port = RtlUshortByteSwap(conn.v6.local_port);
+		// 把原地址信息存放到context中
+		addr_info->ip_version = 6;
+		addr_info->v6.local_address = local_addr->sin6_addr;
+		addr_info->v6.local_port = RtlUshortByteSwap(local_addr->sin6_port);
+		addr_info->v6.remote_address = remote_addr->sin6_addr;
+		addr_info->v6.remote_port = RtlUshortByteSwap(local_addr->sin6_port);
+		addr_info->v6.remote_scope_id = remote_addr->sin6_scope_struct;
+
+		remote_addr->sin6_addr = conn.addr_info.v6.remote_address;
+		remote_addr->sin6_port = RtlUshortByteSwap(conn.addr_info.v6.remote_port);
+		remote_addr->sin6_scope_id = conn.addr_info.v6.remote_scope_id.Value;
+		local_addr->sin6_addr = conn.addr_info.v6.local_address;
+		local_addr->sin6_port = RtlUshortByteSwap(conn.addr_info.v6.local_port);
 	}
 
 

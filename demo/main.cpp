@@ -4,20 +4,20 @@
 
 void process(connect_t& conn)
 {
-	if (conn.ip_version == 4 && conn.v4.remote_port == 5000)
+	if (conn.addr_info.ip_version == 4 && conn.addr_info.v4.remote_port == 5000)
 	{
 		std::cout << "redirect v4." << std::endl;
 		//inet_pton要求地址为网络字节序
-		auto addr = htonl(conn.v4.remote_address.S_un.S_addr);
+		auto addr = htonl(conn.addr_info.v4.remote_address.S_un.S_addr);
 		inet_pton(AF_INET, "127.0.0.1", &addr);
-		conn.v4.remote_port = 5001;
+		conn.addr_info.v4.remote_port = 5001;
 	}
-	else if (conn.ip_version == 6 && conn.v6.remote_port == 5000)
+	else if (conn.addr_info.ip_version == 6 && conn.addr_info.v6.remote_port == 5000)
 	{
 		std::cout << "redirect v6." << std::endl;
-		inet_pton(AF_INET6, "::1", &conn.v6.remote_address);
-		conn.v6.remote_port = 5001;
-		conn.v6.remote_scope_id.Value = 0;
+		inet_pton(AF_INET6, "::1", &conn.addr_info.v6.remote_address);
+		conn.addr_info.v6.remote_port = 5001;
+		conn.addr_info.v6.remote_scope_id.Value = 0;
 	}
 }
 
@@ -49,31 +49,31 @@ int main()
 			continue;
 		}
 
-		if (conn.ip_version == 4)
+		if (conn.addr_info.ip_version == 4)
 		{
-			auto local_addr = conn.v4.local_address;
-			auto local_port = conn.v4.local_port;
-			auto remote_addr = conn.v4.remote_address;
-			auto remote_port = conn.v4.remote_port;
+			auto local_addr = conn.addr_info.v4.local_address;
+			auto local_port = conn.addr_info.v4.local_port;
+			auto remote_addr = conn.addr_info.v4.remote_address;
+			auto remote_port = conn.addr_info.v4.remote_port;
 			char local_addr_str[20];
 			inet_ntop(AF_INET, &local_addr, local_addr_str, sizeof(local_addr_str));
 			char remote_addr_str[20];
 			inet_ntop(AF_INET, &remote_addr, remote_addr_str, sizeof(remote_addr_str));
 			printf("%s:%d --> %s:%d, PID:%lld\n",
-				local_addr_str, local_port, remote_addr_str, remote_port, conn.process_id);
+				local_addr_str, local_port, remote_addr_str, remote_port, conn.addr_info.process_id);
 		}
 		else
 		{
-			auto local_addr = conn.v6.local_address;
-			auto local_port = conn.v6.local_port;
-			auto remote_addr = conn.v6.remote_address;
-			auto remote_port = conn.v6.remote_port;
+			auto local_addr = conn.addr_info.v6.local_address;
+			auto local_port = conn.addr_info.v6.local_port;
+			auto remote_addr = conn.addr_info.v6.remote_address;
+			auto remote_port = conn.addr_info.v6.remote_port;
 			char local_addr_str[50];
 			inet_ntop(AF_INET6, &local_addr, local_addr_str, sizeof(local_addr_str));
 			char remote_addr_str[50];
 			inet_ntop(AF_INET6, &remote_addr, remote_addr_str, sizeof(remote_addr_str));
 			printf("%s:%d --> %s:%d, PID:%lld\n",
-				local_addr_str, local_port, remote_addr_str, remote_port, conn.process_id);
+				local_addr_str, local_port, remote_addr_str, remote_port, conn.addr_info.process_id);
 		}
 
 		process(conn);
