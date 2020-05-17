@@ -20,7 +20,7 @@
 #include <initguid.h>			// Used to define GUID's
 #include "devguid.h"
 
-#include "common.h"
+#include "../libredirect/libredirect_common.h"
 
 struct conn_item_t
 {

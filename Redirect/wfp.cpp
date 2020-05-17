@@ -1,7 +1,7 @@
 #include "wfp.h"
 #include "wfp_callbacks.h"
 #include <stddef.h>
-#include "common.h"
+#include "../libredirect/libredirect_common.h"
 
 HANDLE filter_engine_handle = nullptr;
 HANDLE redirect_handle = nullptr;

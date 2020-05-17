@@ -10,4 +10,8 @@
 /Redirect/Debug
 /Redirect/Release
 
+/demo/x64
+/demo/Debug
+/demo/Release
+
 /.vs

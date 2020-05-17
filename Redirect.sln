@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Redirect", "Redirect\Redire
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libredirect", "libredirect\libredirect.vcxproj", "{5DA1BED1-E0A9-49BF-BF3A-3987CE760572}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "demo", "demo\demo.vcxproj", "{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|ARM = Debug|ARM
@@ -55,6 +57,18 @@ Global
 		{5DA1BED1-E0A9-49BF-BF3A-3987CE760572}.Release|x64.Build.0 = Release|x64
 		{5DA1BED1-E0A9-49BF-BF3A-3987CE760572}.Release|x86.ActiveCfg = Release|Win32
 		{5DA1BED1-E0A9-49BF-BF3A-3987CE760572}.Release|x86.Build.0 = Release|Win32
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Debug|ARM.ActiveCfg = Debug|Win32
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Debug|ARM64.ActiveCfg = Debug|Win32
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Debug|x64.ActiveCfg = Debug|x64
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Debug|x64.Build.0 = Debug|x64
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Debug|x86.ActiveCfg = Debug|Win32
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Debug|x86.Build.0 = Debug|Win32
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Release|ARM.ActiveCfg = Release|Win32
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Release|ARM64.ActiveCfg = Release|Win32
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Release|x64.ActiveCfg = Release|x64
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Release|x64.Build.0 = Release|x64
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Release|x86.ActiveCfg = Release|Win32
+		{E0E12DAC-BBF9-4A77-91DD-4E3DF2CEA304}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,7 +1,7 @@
 #include <ntifs.h>
 #include "io_callbacks.h"
 #include "wfp_callbacks.h"
-#include "common.h"
+#include "../libredirect/libredirect_common.h"
 
 
 VOID file_create(IN WDFDEVICE device, IN WDFREQUEST request, IN WDFFILEOBJECT object)
