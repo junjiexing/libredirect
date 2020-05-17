@@ -1,5 +1,4 @@
 #define INITGUID
-#include <iostream>
 #include <cassert>
 
 #include "libredirect.h"
@@ -154,7 +153,7 @@ void libredirect_close(HANDLE handle)
 int libredirect_read_connect(HANDLE handle, connect_t* conn)
 {
 	DWORD recv_num;
-	auto ret = DeviceIoControl(handle, IOCTL_GET_CONN, nullptr, 0, &conn, sizeof(connect_t), &recv_num, nullptr);
+	auto ret = DeviceIoControl(handle, IOCTL_GET_CONN, nullptr, 0, conn, sizeof(connect_t), &recv_num, nullptr);
 	if (!ret || recv_num != sizeof(connect_t))
 	{
 		return 0;
@@ -164,9 +163,9 @@ int libredirect_read_connect(HANDLE handle, connect_t* conn)
 	return 1;
 }
 
-int libredirect_write_connect(HANDLE handle, const connect_t* conn)
+int libredirect_write_connect(HANDLE handle, connect_t* conn)
 {
 	DWORD recv_num;
-	return DeviceIoControl(handle, IOCTL_SET_CONN, &conn, sizeof(conn), nullptr, 0, &recv_num, nullptr);
+	return DeviceIoControl(handle, IOCTL_SET_CONN, conn, sizeof(connect_t), nullptr, 0, &recv_num, nullptr);
 }
 

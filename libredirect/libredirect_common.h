@@ -44,6 +44,8 @@ struct connect_t
 
 	UINT64 process_id;
 
+	DWORD local_redirect_pid;
+
 	struct
 	{
 		UINT64 classify_handle;

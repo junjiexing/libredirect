@@ -31,7 +31,7 @@ extern "C"
 	LIBREDIRECT_API void libredirect_close(HANDLE handle);
 
 	LIBREDIRECT_API int libredirect_read_connect(HANDLE handle, connect_t* conn);
-	LIBREDIRECT_API int libredirect_write_connect(HANDLE handle, const connect_t* conn);
+	LIBREDIRECT_API int libredirect_write_connect(HANDLE handle, connect_t* conn);
 
 #ifdef __cplusplus
 }

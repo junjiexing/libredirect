@@ -14,4 +14,8 @@
 /demo/Debug
 /demo/Release
 
+/demo_with_asio/x64
+/demo_with_asio/Debug
+/demo_with_asio/Release
+
 /.vs

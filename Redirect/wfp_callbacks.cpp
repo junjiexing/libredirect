@@ -6,7 +6,7 @@ LIST_ENTRY connect_list;
 WDFWAITLOCK connect_list_lck;
 
 
-#define FORMAT_ADDR4(x) x.S_un.S_un_b.s_b1, x.S_un.S_un_b.s_b2, x.S_un.S_un_b.s_b3, x.S_un.S_un_b.s_b4
+#define FORMAT_ADDR4(x) x.S_un.S_un_b.s_b4, x.S_un.S_un_b.s_b3, x.S_un.S_un_b.s_b2, x.S_un.S_un_b.s_b1
 
 #define FORMAT_ADDR6(x)  RtlUshortByteSwap(x.u.Word[0]), \
 	RtlUshortByteSwap(x.u.Word[1]), \
@@ -33,6 +33,7 @@ void callout_classify(
 	KdPrint(("|LIBREDIRECT|callout_classify|layerId: %d", inFixedValues->layerId));
 	connect_t conn;
 	conn.process_id = inMetaValues->processId;
+	conn.local_redirect_pid = 0xFFFF;
 	if (inFixedValues->layerId == FWPS_LAYER_ALE_CONNECT_REDIRECT_V4)
 	{
 		conn.ip_version = 4;
@@ -211,10 +212,12 @@ void do_redirect(connect_t& conn)
 		auto remote_addr = reinterpret_cast<SOCKADDR_IN*>(&connect_request->remoteAddressAndPort);
 		auto local_addr = reinterpret_cast<SOCKADDR_IN*>(&connect_request->localAddressAndPort);
 #if DBG
-		auto local_ip = local_addr->sin_addr;
-		auto local_port = local_addr->sin_port;
-		auto remote_ip = remote_addr->sin_addr;
-		auto remote_port = remote_addr->sin_port;
+		IN_ADDR local_ip;
+		local_ip.S_un.S_addr = RtlUlongByteSwap(local_addr->sin_addr.S_un.S_addr);
+		auto local_port = RtlUshortByteSwap(local_addr->sin_port);
+		IN_ADDR remote_ip;
+		remote_ip.S_un.S_addr = RtlUlongByteSwap(remote_addr->sin_addr.S_un.S_addr);
+		auto remote_port = RtlUshortByteSwap(remote_addr->sin_port);
 
 		auto mod_local_ip = conn.v4.local_address;
 		auto mod_local_port = conn.v4.local_port;
@@ -223,8 +226,8 @@ void do_redirect(connect_t& conn)
 
 
 		DbgPrint("|LIBREDIRECT|do_redirect|IPv4 origin: %d.%d.%d.%d:%hu --> %d.%d.%d.%d:%hu; modified: %d.%d.%d.%d:%hu --> %d.%d.%d.%d:%hu",
-			FORMAT_ADDR4(local_ip), RtlUshortByteSwap(local_port),
-			FORMAT_ADDR4(remote_ip), RtlUshortByteSwap(remote_port),
+			FORMAT_ADDR4(local_ip), local_port,
+			FORMAT_ADDR4(remote_ip), remote_port,
 			FORMAT_ADDR4(mod_local_ip), mod_local_port,
 			FORMAT_ADDR4(mod_remote_ip), mod_remote_port);
 #endif
@@ -270,7 +273,7 @@ void do_redirect(connect_t& conn)
 
 
 	connect_request->localRedirectHandle = redirect_handle;
-	connect_request->localRedirectTargetPID = 0xFFFF;
+	connect_request->localRedirectTargetPID = conn.local_redirect_pid;
 
 	FwpsApplyModifiedLayerData(conn._priv.classify_handle, writeable_layer_data, FWPS_CLASSIFY_FLAG_REAUTHORIZE_IF_MODIFIED_BY_OTHERS);
 	conn._priv.classify_out.actionType = FWP_ACTION_PERMIT;

@@ -7,7 +7,9 @@ void process(connect_t& conn)
 	if (conn.ip_version == 4 && conn.v4.remote_port == 5000)
 	{
 		std::cout << "redirect v4." << std::endl;
-		inet_pton(AF_INET, "127.0.0.1", &conn.v4.remote_address);
+		//inet_pton要求地址为网络字节序
+		auto addr = htonl(conn.v4.remote_address.S_un.S_addr);
+		inet_pton(AF_INET, "127.0.0.1", &addr);
 		conn.v4.remote_port = 5001;
 	}
 	else if (conn.ip_version == 6 && conn.v6.remote_port == 5000)
